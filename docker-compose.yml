@@ -1,0 +1,40 @@
+version: '3'
+
+services:
+  nginx:
+    image: nginx:latest
+    ports:
+      - "8000:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./app:/app
+
+  php:
+    build:
+      context: .
+      dockerfile: PHP.Dockerfile
+    volumes:
+      - ./app:/app
+
+  mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: 'secret123'
+      MYSQL_DATABASE: 'inventory_management'
+    volumes:
+      - mysqldata:/var/lib/mysql
+      - ./inventory_management_export.sql:/docker-entrypoint-initdb.d/inventory_management_export.sql:ro
+    ports:
+      - "3306:3306"
+
+  phpmyadmin:
+    image: phpmyadmin:latest
+    ports:
+      - "8080:80"
+    environment:
+      - PMA_HOST=mysql
+      - PMA_USER=root
+      - PMA_PASSWORD=secret123
+
+volumes:
+  mysqldata: {}
